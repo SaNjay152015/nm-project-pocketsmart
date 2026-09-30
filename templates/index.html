@@ -1,0 +1,2365 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>PocketSmart AI</title>
+
+    <link
+        rel="stylesheet"
+        href="{{ url_for('static', path='css/style.css') }}"
+    >
+
+    <style>
+        .workspace-actions {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-top: 20px;
+        }
+
+        .secondary-recommendation-btn,
+        .save-recommendation-btn,
+        .saved-item-actions button {
+            border: 1px solid rgba(0,191,255,.35);
+            background: rgba(0,191,255,.08);
+            color: #9eeaff;
+            border-radius: 9px;
+            padding: 10px 14px;
+            cursor: pointer;
+        }
+
+        .save-recommendation-btn:hover,
+        .secondary-recommendation-btn:hover,
+        .saved-item-actions button:hover {
+            background: rgba(0,191,255,.16);
+        }
+
+        .recommendation-body {
+            line-height: 1.75;
+        }
+
+        .recommendation-body h3,
+        .recommendation-body h4 {
+            margin: 20px 0 8px;
+            color: #8eeaff;
+        }
+
+        .recommendation-body p {
+            margin: 8px 0;
+        }
+
+        .recommendation-body li {
+            margin: 6px 0;
+        }
+
+        .recommendation-table-wrap {
+            overflow-x: auto;
+            margin: 18px 0;
+        }
+
+        .recommendation-table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 500px;
+        }
+
+        .recommendation-table th,
+        .recommendation-table td {
+            padding: 11px;
+            border: 1px solid rgba(125,211,252,.16);
+            text-align: left;
+        }
+
+        .recommendation-table th {
+            background: rgba(0,191,255,.08);
+        }
+
+        .platform-cards {
+            margin-top: 24px;
+        }
+
+        .platform-title {
+            font-weight: 700;
+            margin-bottom: 10px;
+        }
+
+        .platform-cards {
+            display: grid;
+            grid-template-columns:
+                repeat(auto-fit, minmax(140px, 1fr));
+            gap: 10px;
+        }
+
+        .platform-card {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            padding: 13px;
+            border: 1px solid rgba(0,191,255,.22);
+            border-radius: 12px;
+            background: rgba(0,191,255,.05);
+            text-decoration: none;
+            color: inherit;
+        }
+
+        .platform-card small {
+            opacity: .65;
+        }
+
+        .recommendation-actions {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-top: 20px;
+        }
+
+        .saved-section {
+            padding: 80px 7%;
+            max-width: 1400px;
+            margin: auto;
+        }
+
+        .saved-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 22px;
+        }
+
+        .saved-panel {
+            border: 1px solid rgba(125,211,252,.14);
+            background: rgba(8,18,30,.72);
+            border-radius: 18px;
+            padding: 24px;
+            backdrop-filter: blur(12px);
+        }
+
+        .saved-panel h3 {
+            margin: 0;
+        }
+
+        .saved-panel > p {
+            opacity: .65;
+        }
+
+        .saved-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-top: 18px;
+        }
+
+        .saved-item {
+            display: flex;
+            gap: 14px;
+            padding: 15px;
+            border: 1px solid rgba(125,211,252,.12);
+            border-radius: 13px;
+            background: rgba(255,255,255,.025);
+        }
+
+        .saved-item-icon {
+            width: 42px;
+            height: 42px;
+            display: grid;
+            place-items: center;
+            border-radius: 11px;
+            background: rgba(0,191,255,.1);
+            font-size: 20px;
+            flex: none;
+        }
+
+        .saved-item-main {
+            min-width: 0;
+            flex: 1;
+        }
+
+        .saved-item-top {
+            display: flex;
+            justify-content: space-between;
+            gap: 10px;
+        }
+
+        .saved-item-top small {
+            opacity: .5;
+        }
+
+        .history-type {
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: #7dd3fc;
+        }
+
+        .saved-item h4 {
+            margin: 7px 0;
+        }
+
+        .saved-item p {
+            margin: 0;
+            opacity: .68;
+            line-height: 1.5;
+        }
+
+        .saved-item-actions {
+            display: flex;
+            gap: 8px;
+            margin-top: 12px;
+        }
+
+        .empty-state {
+            padding: 30px 10px;
+            text-align: center;
+            opacity: .7;
+        }
+
+        .empty-state div {
+            font-size: 30px;
+            margin-bottom: 8px;
+        }
+
+        .status-dot {
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #00ff9d;
+            box-shadow: 0 0 10px #00ff9d;
+            margin-right: 7px;
+        }
+
+        .logout-btn {
+            border: 1px solid rgba(0,191,255,.45);
+            background: rgba(0,191,255,.08);
+            color: #7dd3fc;
+            padding: 9px 15px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 600;
+        }
+
+        .nav-actions {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .user-area {
+            display: flex;
+            align-items: center;
+            color: #7dd3fc;
+            font-size: 14px;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+
+        .logout-btn:hover {
+            background: rgba(0,191,255,.18);
+            border-color: #00bfff;
+            box-shadow: 0 0 15px rgba(0,191,255,.25);
+        }
+
+        @media(max-width:850px) {
+
+            .saved-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .user-area {
+                display: none;
+            }
+
+            .nav-actions {
+                gap: 7px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+<!-- ========================================================= -->
+<!-- BACKGROUND -->
+<!-- ========================================================= -->
+
+<div class="background-reactor" aria-hidden="true">
+
+    <div class="bg-reactor-ring bg-ring-1"></div>
+    <div class="bg-reactor-ring bg-ring-2"></div>
+    <div class="bg-reactor-ring bg-ring-3"></div>
+
+    <div class="bg-reactor-grid"></div>
+
+    <div class="bg-reactor-core">
+        <div class="bg-core-inner"></div>
+        <div class="bg-core-glow"></div>
+    </div>
+
+    <div class="bg-reactor-beam bg-beam-1"></div>
+    <div class="bg-reactor-beam bg-beam-2"></div>
+    <div class="bg-reactor-beam bg-beam-3"></div>
+
+</div>
+
+
+<!-- ========================================================= -->
+<!-- NAVBAR -->
+<!-- ========================================================= -->
+
+<nav class="navbar">
+
+    <div class="logo">
+        <span class="logo-icon">◈</span>
+        PocketSmart <span>AI</span>
+    </div>
+
+    <div class="nav-links">
+
+        <a href="#home">
+            Home
+        </a>
+
+        <a href="#planners">
+            Planners
+        </a>
+
+        <a href="#dashboard">
+            Dashboard
+        </a>
+
+        <a href="#saved">
+            My Plans
+        </a>
+
+        <a href="#features">
+            Features
+        </a>
+
+    </div>
+
+    <div class="nav-actions">
+
+        <div class="user-area">
+            <span id="welcomeUser">
+                Welcome
+            </span>
+        </div>
+
+        <button
+            id="logoutButton"
+            class="logout-btn"
+            type="button"
+        >
+            Logout
+        </button>
+
+        <button
+            id="themeToggle"
+            class="theme-btn"
+            type="button"
+        >
+            ◐
+        </button>
+
+    </div>
+
+</nav>
+
+
+<main>
+
+
+<!-- ========================================================= -->
+<!-- HERO -->
+<!-- ========================================================= -->
+
+<section class="hero" id="home">
+
+    <div class="hero-content">
+
+        <div class="badge">
+            ✦ AI-Powered Budget Assistant
+        </div>
+
+        <h1>
+            Spend smarter.
+            <span>Plan better.</span>
+        </h1>
+
+        <p>
+            PocketSmart AI helps you plan your budget,
+            discover better options, and make smarter
+            decisions without overspending.
+        </p>
+
+        <div class="hero-buttons">
+
+            <button
+                class="primary-button"
+                onclick="scrollToPlanners()"
+            >
+                Start Planning →
+            </button>
+
+            <button
+                class="primary-button"
+                onclick="scrollToFeatures()"
+            >
+                Explore Features
+            </button>
+
+        </div>
+
+    </div>
+
+
+    <div class="hero-card">
+
+        <div class="card-header">
+
+            <span>
+                Monthly Budget
+            </span>
+
+            <span class="green">
+                ● On Track
+            </span>
+
+        </div>
+
+        <div class="budget-amount">
+            ₹25,000
+        </div>
+
+        <div class="progress-container">
+            <div class="progress-bar"></div>
+        </div>
+
+        <div class="budget-info">
+
+            <div>
+                <small>
+                    Spent
+                </small>
+
+                <strong>
+                    ₹15,400
+                </strong>
+            </div>
+
+            <div>
+                <small>
+                    Remaining
+                </small>
+
+                <strong>
+                    ₹9,600
+                </strong>
+            </div>
+
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- ========================================================= -->
+<!-- PLANNERS -->
+<!-- ========================================================= -->
+
+<section
+    class="planners"
+    id="planners"
+>
+
+    <div class="section-heading">
+
+        <div class="badge">
+            Smart Planning
+        </div>
+
+        <h2>
+            What are you planning?
+        </h2>
+
+        <p>
+            Choose a planner and let PocketSmart AI
+            organize your budget.
+        </p>
+
+    </div>
+
+
+    <div class="planner-grid">
+
+
+        <!-- HOME -->
+
+        <div class="planner-card">
+
+            <div class="planner-icon">
+                🏠
+            </div>
+
+            <h3>
+                Home Interior
+            </h3>
+
+            <p>
+                Plan furniture, lighting, decor and
+                other essentials within your budget.
+            </p>
+
+            <button
+                type="button"
+                onclick="openHomePlanner()"
+            >
+                Plan My Home →
+            </button>
+
+        </div>
+
+
+        <!-- PARTY -->
+
+        <div class="planner-card">
+
+            <div class="planner-icon">
+                🎉
+            </div>
+
+            <h3>
+                Party Planner
+            </h3>
+
+            <p>
+                Organize food, venue, decoration and
+                entertainment without overspending.
+            </p>
+
+            <button
+                type="button"
+                onclick="openPartyPlanner()"
+            >
+                Plan My Party →
+            </button>
+
+        </div>
+
+
+        <!-- JEWELRY -->
+
+        <div class="planner-card">
+
+            <div class="planner-icon">
+                💎
+            </div>
+
+            <h3>
+                Jewelry Planner
+            </h3>
+
+            <p>
+                Find jewelry that matches your
+                occasion, outfit and personal style.
+            </p>
+
+            <button
+                type="button"
+                onclick="openJewelryPlanner()"
+            >
+                Find Jewelry →
+            </button>
+
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- ========================================================= -->
+<!-- HOME INTERIOR PLANNER -->
+<!-- ========================================================= -->
+
+<section
+    class="planner-workspace"
+    id="homePlanner"
+    style="display:none"
+>
+
+    <div class="section-heading">
+
+        <div class="badge">
+            🏠 HOME INTERIOR AI
+        </div>
+
+        <h2>
+            Plan your space.
+        </h2>
+
+        <p>
+            Tell PocketSmart AI about your room,
+            style and budget.
+        </p>
+
+    </div>
+
+
+    <div class="planner-form">
+
+
+        <div class="input-group">
+
+            <label>
+                Your Budget
+            </label>
+
+            <div class="input-box">
+
+                <span>
+                    ₹
+                </span>
+
+                <input
+                    type="number"
+                    id="homeBudget"
+                    min="1"
+                    placeholder="25000"
+                >
+
+            </div>
+
+        </div>
+
+
+        <div class="input-group">
+
+            <label>
+                Room Type
+            </label>
+
+            <select id="homeRoom">
+
+                <option value="">
+                    Select room
+                </option>
+
+                <option>
+                    Bedroom
+                </option>
+
+                <option>
+                    Living Room
+                </option>
+
+                <option>
+                    Kitchen
+                </option>
+
+                <option>
+                    Study Room
+                </option>
+
+                <option>
+                    Full Home
+                </option>
+
+            </select>
+
+        </div>
+
+
+        <div class="input-group">
+
+            <label>
+                Preferred Style
+            </label>
+
+            <select id="homeStyle">
+
+                <option value="">
+                    Select style
+                </option>
+
+                <option>
+                    Modern
+                </option>
+
+                <option>
+                    Minimalist
+                </option>
+
+                <option>
+                    Traditional
+                </option>
+
+                <option>
+                    Luxury
+                </option>
+
+                <option>
+                    Budget Friendly
+                </option>
+
+            </select>
+
+        </div>
+
+
+        <div class="input-group">
+
+            <label>
+                What do you need?
+            </label>
+
+            <textarea
+                id="homeItems"
+                rows="4"
+                placeholder="bed, wardrobe, study table, curtains, lighting"
+            ></textarea>
+
+        </div>
+
+
+        <div class="input-group">
+
+            <label>
+                Quantity / Requirements
+            </label>
+
+            <input
+                type="text"
+                id="homeQuantity"
+                placeholder="1 bed, 1 wardrobe, 2 lights"
+            >
+
+        </div>
+
+
+        <button
+            type="button"
+            class="calculate-btn"
+            onclick="generateHomePlan()"
+        >
+            ✦ Generate My Home Plan
+        </button>
+
+    </div>
+
+
+    <div
+        class="planner-result"
+        id="homePlannerResult"
+        style="display:none"
+    >
+
+        <div class="result-header">
+
+            <div>
+
+                <div class="badge">
+                    GEMINI ANALYSIS
+                </div>
+
+                <h3>
+                    Your Home Interior Plan
+                </h3>
+
+            </div>
+
+            <span class="system-status">
+
+                <span class="status-dot"></span>
+
+                AI ONLINE
+
+            </span>
+
+        </div>
+
+        <div
+            class="result-content"
+            id="homeRecommendation"
+        ></div>
+
+    </div>
+
+</section>
+
+
+<!-- ========================================================= -->
+<!-- PARTY PLANNER -->
+<!-- ========================================================= -->
+
+<section
+    class="planner-workspace"
+    id="partyPlanner"
+    style="display:none"
+>
+
+    <div class="section-heading">
+
+        <div class="badge">
+            🎉 PARTY AI
+        </div>
+
+        <h2>
+            Plan your perfect event.
+        </h2>
+
+        <p>
+            Tell PocketSmart AI about your
+            event, guests and budget.
+        </p>
+
+    </div>
+
+
+    <div class="planner-form">
+
+
+        <div class="input-group">
+
+            <label>
+                Your Budget
+            </label>
+
+            <div class="input-box">
+
+                <span>
+                    ₹
+                </span>
+
+                <input
+                    type="number"
+                    id="partyBudget"
+                    min="1"
+                    placeholder="30000"
+                >
+
+            </div>
+
+        </div>
+
+
+        <div class="input-group">
+
+            <label>
+                Number of Guests
+            </label>
+
+            <input
+                type="number"
+                id="partyGuests"
+                min="1"
+                placeholder="50"
+            >
+
+        </div>
+
+
+        <div class="input-group">
+
+            <label>
+                Event Type
+            </label>
+
+            <select id="partyEvent">
+
+                <option value="">
+                    Select event
+                </option>
+
+                <option>
+                    Birthday
+                </option>
+
+                <option>
+                    Wedding
+                </option>
+
+                <option>
+                    Engagement
+                </option>
+
+                <option>
+                    Anniversary
+                </option>
+
+                <option>
+                    College Event
+                </option>
+
+                <option>
+                    Family Function
+                </option>
+
+                <option>
+                    Other
+                </option>
+
+            </select>
+
+        </div>
+
+
+        <div class="input-group">
+
+            <label>
+                Venue
+            </label>
+
+            <select id="partyVenue">
+
+                <option value="">
+                    Select venue
+                </option>
+
+                <option>
+                    Home
+                </option>
+
+                <option>
+                    Restaurant
+                </option>
+
+                <option>
+                    Banquet Hall
+                </option>
+
+                <option>
+                    Outdoor
+                </option>
+
+                <option>
+                    Hotel
+                </option>
+
+                <option>
+                    Community Hall
+                </option>
+
+            </select>
+
+        </div>
+
+
+        <button
+            type="button"
+            class="calculate-btn"
+            onclick="generatePartyPlan()"
+        >
+            ✦ Generate My Party Plan
+        </button>
+
+    </div>
+
+
+    <div
+        class="planner-result"
+        id="partyPlannerResult"
+        style="display:none"
+    >
+
+        <div class="result-header">
+
+            <div>
+
+                <div class="badge">
+                    GEMINI ANALYSIS
+                </div>
+
+                <h3>
+                    Your Party Plan
+                </h3>
+
+            </div>
+
+            <span class="system-status">
+
+                <span class="status-dot"></span>
+
+                AI ONLINE
+
+            </span>
+
+        </div>
+
+        <div
+            class="result-content"
+            id="partyRecommendation"
+        ></div>
+
+    </div>
+
+</section>
+
+
+<!-- ========================================================= -->
+<!-- JEWELRY PLANNER -->
+<!-- ========================================================= -->
+
+<section
+    class="planner-workspace"
+    id="jewelryPlanner"
+    style="display:none"
+>
+
+    <div class="section-heading">
+
+        <div class="badge">
+            💎 JEWELRY AI
+        </div>
+
+        <h2>
+            Find your perfect match.
+        </h2>
+
+        <p>
+            Tell PocketSmart AI about your
+            occasion, style and budget.
+        </p>
+
+    </div>
+
+
+    <div class="planner-form">
+
+
+        <div class="input-group">
+
+            <label>
+                Your Budget
+            </label>
+
+            <div class="input-box">
+
+                <span>
+                    ₹
+                </span>
+
+                <input
+                    type="number"
+                    id="jewelryBudget"
+                    min="1"
+                    placeholder="10000"
+                >
+
+            </div>
+
+        </div>
+
+
+        <div class="input-group">
+
+            <label>
+                Occasion
+            </label>
+
+            <select id="jewelryOccasion">
+
+                <option value="">
+                    Select occasion
+                </option>
+
+                <option>
+                    Casual
+                </option>
+
+                <option>
+                    College
+                </option>
+
+                <option>
+                    Party
+                </option>
+
+                <option>
+                    Wedding
+                </option>
+
+                <option>
+                    Engagement
+                </option>
+
+                <option>
+                    Festival
+                </option>
+
+                <option>
+                    Formal
+                </option>
+
+            </select>
+
+        </div>
+
+
+        <div class="input-group">
+
+            <label>
+                Preferred Style
+            </label>
+
+            <select id="jewelryStyle">
+
+                <option value="">
+                    Select style
+                </option>
+
+                <option>
+                    Minimal
+                </option>
+
+                <option>
+                    Traditional
+                </option>
+
+                <option>
+                    Modern
+                </option>
+
+                <option>
+                    Elegant
+                </option>
+
+                <option>
+                    Statement
+                </option>
+
+            </select>
+
+        </div>
+
+
+        <div class="input-group">
+
+            <label>
+                Outfit Image
+                <span style="opacity:.6">
+                    (Optional)
+                </span>
+            </label>
+
+            <input
+                type="file"
+                id="outfitImage"
+                accept="image/*"
+            >
+
+        </div>
+
+
+        <button
+            type="button"
+            class="calculate-btn"
+            onclick="generateJewelryPlan()"
+        >
+            ✦ Find My Jewelry
+        </button>
+
+    </div>
+
+
+    <div
+        class="planner-result"
+        id="jewelryPlannerResult"
+        style="display:none"
+    >
+
+        <div class="result-header">
+
+            <div>
+
+                <div class="badge">
+                    GEMINI ANALYSIS
+                </div>
+
+                <h3>
+                    Your Jewelry Recommendation
+                </h3>
+
+            </div>
+
+            <span class="system-status">
+
+                <span class="status-dot"></span>
+
+                AI ONLINE
+
+            </span>
+
+        </div>
+
+        <div
+            class="result-content"
+            id="jewelryRecommendation"
+        ></div>
+
+    </div>
+
+</section>
+
+
+<!-- ========================================================= -->
+<!-- BUDGET DASHBOARD -->
+<!-- ========================================================= -->
+
+<section
+    class="dashboard"
+    id="dashboard"
+>
+
+
+    <div class="budget-input-panel">
+
+        <div class="section-heading">
+
+            <div class="badge">
+                ⚙️ Customize Budget
+            </div>
+
+            <h2>
+                Set your numbers.
+            </h2>
+
+            <p>
+                Enter your monthly budget and
+                expenses to see your plan update.
+            </p>
+
+        </div>
+
+
+        <div class="input-grid">
+
+
+            <div class="input-group">
+
+                <label>
+                    Monthly Income
+                </label>
+
+                <div class="input-box">
+
+                    <span>
+                        ₹
+                    </span>
+
+                    <input
+                        type="number"
+                        id="incomeInput"
+                        value="25000"
+                        min="0"
+                    >
+
+                </div>
+
+            </div>
+
+
+            <div class="input-group">
+
+                <label>
+                    Food
+                </label>
+
+                <div class="input-box">
+
+                    <span>
+                        ₹
+                    </span>
+
+                    <input
+                        type="number"
+                        id="foodInput"
+                        value="4200"
+                        min="0"
+                    >
+
+                </div>
+
+            </div>
+
+
+            <div class="input-group">
+
+                <label>
+                    Transport
+                </label>
+
+                <div class="input-box">
+
+                    <span>
+                        ₹
+                    </span>
+
+                    <input
+                        type="number"
+                        id="transportInput"
+                        value="2800"
+                        min="0"
+                    >
+
+                </div>
+
+            </div>
+
+
+            <div class="input-group">
+
+                <label>
+                    Shopping
+                </label>
+
+                <div class="input-box">
+
+                    <span>
+                        ₹
+                    </span>
+
+                    <input
+                        type="number"
+                        id="shoppingInput"
+                        value="3400"
+                        min="0"
+                    >
+
+                </div>
+
+            </div>
+
+
+            <div class="input-group">
+
+                <label>
+                    Bills
+                </label>
+
+                <div class="input-box">
+
+                    <span>
+                        ₹
+                    </span>
+
+                    <input
+                        type="number"
+                        id="billsInput"
+                        value="5000"
+                        min="0"
+                    >
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <button
+            type="button"
+            class="calculate-btn"
+            onclick="updateBudget()"
+        >
+            Calculate My Budget →
+        </button>
+
+    </div>
+
+
+    <div class="section-heading">
+
+        <div class="badge">
+            💰 Budget Dashboard
+        </div>
+
+        <h2>
+            Your money at a glance.
+        </h2>
+
+        <p>
+            Track your income, spending,
+            savings and remaining budget.
+        </p>
+
+    </div>
+
+
+    <div class="dashboard-grid">
+
+
+        <div class="dashboard-card">
+
+            <div class="dashboard-card-top">
+
+                <span>
+                    Monthly Income
+                </span>
+
+                <span>
+                    💵
+                </span>
+
+            </div>
+
+            <h3 id="incomeDisplay">
+                ₹25,000
+            </h3>
+
+            <p>
+                Your planned monthly income
+            </p>
+
+        </div>
+
+
+        <div class="dashboard-card">
+
+            <div class="dashboard-card-top">
+
+                <span>
+                    Total Spent
+                </span>
+
+                <span>
+                    🛒
+                </span>
+
+            </div>
+
+            <h3 id="spentDisplay">
+                ₹15,400
+            </h3>
+
+            <p>
+                <span id="percentageDisplay">
+                    61.6%
+                </span>
+                of your income
+            </p>
+
+        </div>
+
+
+        <div class="dashboard-card">
+
+            <div class="dashboard-card-top">
+
+                <span>
+                    Remaining
+                </span>
+
+                <span>
+                    💳
+                </span>
+
+            </div>
+
+            <h3 id="remainingDisplay">
+                ₹9,600
+            </h3>
+
+            <p>
+                Available to spend or save
+            </p>
+
+        </div>
+
+
+        <div class="dashboard-card">
+
+            <div class="dashboard-card-top">
+
+                <span>
+                    Savings
+                </span>
+
+                <span>
+                    📈
+                </span>
+
+            </div>
+
+            <h3 id="savingsDisplay">
+                ₹9,600
+            </h3>
+
+            <p>
+                <span id="savingsPercentageDisplay">
+                    38.4%
+                </span>
+                available as savings
+            </p>
+
+        </div>
+
+    </div>
+
+
+    <!-- BUDGET OVERVIEW -->
+
+    <div class="budget-overview">
+
+        <div class="overview-header">
+
+            <div>
+
+                <h3>
+                    Monthly Budget
+                </h3>
+
+                <p>
+
+                    <span id="overviewSpent">
+                        ₹15,400
+                    </span>
+
+                    spent out of
+
+                    <span id="overviewIncome">
+                        ₹25,000
+                    </span>
+
+                </p>
+
+            </div>
+
+            <strong id="overviewPercentage">
+                61.6%
+            </strong>
+
+        </div>
+
+
+        <div
+            class="overview-progress"
+            id="overviewProgress"
+        >
+
+            <div class="overview-progress-bar"></div>
+
+        </div>
+
+
+        <div class="overview-footer">
+
+            <span>
+                ₹0
+            </span>
+
+            <span id="overviewRemaining">
+                ₹9,600
+            </span>
+
+        </div>
+
+    </div>
+
+
+    <!-- EXPENSE BREAKDOWN -->
+
+    <div class="expenses-section">
+
+        <div class="expenses-header">
+
+            <div>
+
+                <h3>
+                    Expense Breakdown
+                </h3>
+
+                <p>
+                    Where your money is going
+                </p>
+
+            </div>
+
+        </div>
+
+
+        <div class="expense-list">
+
+
+            <!-- FOOD -->
+
+            <div class="expense-item">
+
+                <div class="expense-left">
+
+                    <div class="expense-icon">
+                        🍔
+                    </div>
+
+                    <div>
+
+                        <strong>
+                            Food
+                        </strong>
+
+                        <small>
+                            Restaurants & groceries
+                        </small>
+
+                    </div>
+
+                </div>
+
+
+                <div class="expense-right">
+
+                    <strong id="foodExpenseDisplay">
+                        ₹4,200
+                    </strong>
+
+                    <div class="mini-progress">
+
+                        <div
+                            id="foodProgress"
+                            style="width:16.8%"
+                        ></div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- TRANSPORT -->
+
+            <div class="expense-item">
+
+                <div class="expense-left">
+
+                    <div class="expense-icon">
+                        🚗
+                    </div>
+
+                    <div>
+
+                        <strong>
+                            Transport
+                        </strong>
+
+                        <small>
+                            Fuel & travel
+                        </small>
+
+                    </div>
+
+                </div>
+
+
+                <div class="expense-right">
+
+                    <strong id="transportExpenseDisplay">
+                        ₹2,800
+                    </strong>
+
+                    <div class="mini-progress">
+
+                        <div
+                            id="transportProgress"
+                            style="width:11.2%"
+                        ></div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- SHOPPING -->
+
+            <div class="expense-item">
+
+                <div class="expense-left">
+
+                    <div class="expense-icon">
+                        🛍️
+                    </div>
+
+                    <div>
+
+                        <strong>
+                            Shopping
+                        </strong>
+
+                        <small>
+                            Personal purchases
+                        </small>
+
+                    </div>
+
+                </div>
+
+
+                <div class="expense-right">
+
+                    <strong id="shoppingExpenseDisplay">
+                        ₹3,400
+                    </strong>
+
+                    <div class="mini-progress">
+
+                        <div
+                            id="shoppingProgress"
+                            style="width:13.6%"
+                        ></div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- BILLS -->
+
+            <div class="expense-item">
+
+                <div class="expense-left">
+
+                    <div class="expense-icon">
+                        📱
+                    </div>
+
+                    <div>
+
+                        <strong>
+                            Bills
+                        </strong>
+
+                        <small>
+                            Phone, internet & utilities
+                        </small>
+
+                    </div>
+
+                </div>
+
+
+                <div class="expense-right">
+
+                    <strong id="billsExpenseDisplay">
+                        ₹5,000
+                    </strong>
+
+                    <div class="mini-progress">
+
+                        <div
+                            id="billsProgress"
+                            style="width:20%"
+                        ></div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- ========================================================= -->
+<!-- EXPENSE TRACKER -->
+<!-- ========================================================= -->
+
+<section
+    class="expense-tracker"
+    id="expenseTracker"
+>
+
+    <div class="section-heading">
+
+        <div class="badge">
+            📋 Expense Tracker
+        </div>
+
+        <h2>
+            Track every expense.
+        </h2>
+
+        <p>
+            Add your daily spending and
+            keep your budget under control.
+        </p>
+
+    </div>
+
+
+    <div class="expense-layout">
+
+
+        <!-- ADD EXPENSE -->
+
+        <div class="expense-panel">
+
+            <div class="input-group">
+
+                <label>
+                    Expense Name
+                </label>
+
+                <input
+                    type="text"
+                    id="expenseName"
+                    placeholder="e.g. Swiggy"
+                >
+
+            </div>
+
+
+            <div class="input-group">
+
+                <label>
+                    Category
+                </label>
+
+                <select id="expenseCategory">
+
+                    <option>
+                        Food
+                    </option>
+
+                    <option>
+                        Transport
+                    </option>
+
+                    <option>
+                        Shopping
+                    </option>
+
+                    <option>
+                        Bills
+                    </option>
+
+                    <option>
+                        Other
+                    </option>
+
+                </select>
+
+            </div>
+
+
+            <div class="input-group">
+
+                <label>
+                    Amount
+                </label>
+
+                <div class="input-box">
+
+                    <span>
+                        ₹
+                    </span>
+
+                    <input
+                        type="number"
+                        id="expenseAmount"
+                        placeholder="0"
+                        min="0"
+                    >
+
+                </div>
+
+            </div>
+
+
+            <button
+                type="button"
+                class="expense-add-button"
+                onclick="addExpense()"
+            >
+                + Add Expense
+            </button>
+
+        </div>
+
+
+        <!-- EXPENSE HISTORY -->
+
+        <div class="expense-panel">
+
+            <div class="history-header">
+
+                <div>
+
+                    <h3>
+                        Recent Expenses
+                    </h3>
+
+                    <p>
+                        Your latest transactions
+                    </p>
+
+                </div>
+
+                <span id="expenseCount">
+                    0 expenses
+                </span>
+
+            </div>
+
+
+            <div id="expenseHistory">
+
+                <div class="empty-expenses">
+
+                    <div>
+                        🧾
+                    </div>
+
+                    <strong>
+                        No expenses yet
+                    </strong>
+
+                    <p>
+                        Add your first expense above.
+                    </p>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- ========================================================= -->
+<!-- JARVIS -->
+<!-- ========================================================= -->
+
+<section
+    class="jarvis-section"
+    id="jarvis"
+>
+
+    <div class="section-heading">
+
+        <div class="badge">
+            ◉ JARVIS AI
+        </div>
+
+        <h2>
+            Your intelligent budget assistant.
+        </h2>
+
+        <p>
+            Let PocketSmart AI analyze your
+            current budget and provide practical guidance.
+        </p>
+
+    </div>
+
+
+    <div class="jarvis-card">
+
+
+        <div class="jarvis-system-bar">
+
+            <div class="system-status">
+
+                <span class="status-dot"></span>
+
+                SYSTEM ONLINE
+
+            </div>
+
+            <div class="system-id">
+                POCKETSMART // AI CORE
+            </div>
+
+        </div>
+
+
+        <div class="jarvis-header">
+
+
+            <div class="jarvis-core arc-reactor">
+
+                <div class="core-ring ring-1"></div>
+                <div class="core-ring ring-2"></div>
+                <div class="core-ring ring-3"></div>
+
+                <div class="reactor-markings">
+
+                    <span>
+                        01
+                    </span>
+
+                    <span>
+                        07
+                    </span>
+
+                    <span>
+                        12
+                    </span>
+
+                    <span>
+                        18
+                    </span>
+
+                    <span>
+                        24
+                    </span>
+
+                    <span>
+                        30
+                    </span>
+
+                </div>
+
+                <div class="reactor-beam beam-a"></div>
+                <div class="reactor-beam beam-b"></div>
+                <div class="reactor-beam beam-c"></div>
+
+                <div class="core-center">
+
+                    <div class="reactor-core"></div>
+
+                    <div class="reactor-inner-ring"></div>
+
+                    <span class="jarvis-eye">
+                        J
+                    </span>
+
+                </div>
+
+                <div class="hud-orbit orbit-a"></div>
+                <div class="hud-orbit orbit-b"></div>
+                <div class="hud-orbit orbit-c"></div>
+
+            </div>
+
+
+            <div class="jarvis-info">
+
+                <div class="system-label">
+                    POCKETSMART AI
+                </div>
+
+                <h3>
+                    Budget Intelligence Core
+                </h3>
+
+                <p>
+                    Analyze your current budget,
+                    identify spending patterns and
+                    receive personalized guidance.
+                </p>
+
+                <button
+                    type="button"
+                    class="jarvis-button"
+                    onclick="askJarvis()"
+                >
+                    ANALYZE MY BUDGET →
+                </button>
+
+            </div>
+
+        </div>
+
+
+        <div
+            class="jarvis-processing"
+            id="jarvisProcessing"
+            style="display:none"
+        >
+
+            <span class="status-dot"></span>
+
+            ANALYZING FINANCIAL DATA...
+
+        </div>
+
+
+        <div
+            class="jarvis-response"
+            id="jarvisResponse"
+        >
+
+            <div class="jarvis-message-icon">
+                ◈
+            </div>
+
+            <div>
+
+                <strong>
+                    JARVIS RESPONSE
+                </strong>
+
+                <p>
+                    Your AI-generated budget
+                    recommendation will appear here.
+                </p>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- ========================================================= -->
+<!-- PERSONAL DASHBOARD / HISTORY -->
+<!-- ========================================================= -->
+
+<section
+    class="saved-section"
+    id="saved"
+>
+
+    <div class="section-heading">
+
+        <div class="badge">
+            ◈ PERSONAL DASHBOARD
+        </div>
+
+        <h2>
+            Your plans.
+        </h2>
+
+        <p>
+            Review previous AI-generated recommendations
+            and keep your useful plans saved.
+        </p>
+
+    </div>
+
+
+    <div class="saved-grid">
+
+
+        <!-- HISTORY -->
+
+        <div class="saved-panel">
+
+            <h3>
+                Recommendation History
+            </h3>
+
+            <p>
+                Your recent AI-generated plans.
+            </p>
+
+
+            <div
+                class="saved-list"
+                id="historyList"
+            >
+
+                <div class="empty-state">
+
+                    <div>
+                        🕘
+                    </div>
+
+                    <strong>
+                        Loading history...
+                    </strong>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- SAVED -->
+
+        <div class="saved-panel">
+
+            <h3>
+                Saved Recommendations
+            </h3>
+
+            <p>
+                Plans you chose to keep.
+            </p>
+
+
+            <div
+                class="saved-list"
+                id="savedList"
+            >
+
+                <div class="empty-state">
+
+                    <div>
+                        ☆
+                    </div>
+
+                    <strong>
+                        Loading saved plans...
+                    </strong>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- ========================================================= -->
+<!-- FEATURES -->
+<!-- ========================================================= -->
+
+<section
+    class="features"
+    id="features"
+>
+
+    <div class="section-heading">
+
+        <div class="badge">
+            Why PocketSmart?
+        </div>
+
+        <h2>
+            More than just recommendations.
+        </h2>
+
+        <p>
+            A smarter way to understand and manage
+            your everyday spending.
+        </p>
+
+    </div>
+
+
+    <div class="features-grid">
+
+
+        <div class="feature-card">
+
+            <div class="planner-icon">
+                💰
+            </div>
+
+            <h3>
+                Budget First
+            </h3>
+
+            <p>
+                Every recommendation is designed
+                around your spending limit.
+            </p>
+
+        </div>
+
+
+        <div class="feature-card">
+
+            <div class="planner-icon">
+                ✨
+            </div>
+
+            <h3>
+                AI Recommendations
+            </h3>
+
+            <p>
+                Get personalized suggestions based
+                on your budget and preferences.
+            </p>
+
+        </div>
+
+
+        <div class="feature-card">
+
+            <div class="planner-icon">
+                📊
+            </div>
+
+            <h3>
+                Smart Allocation
+            </h3>
+
+            <p>
+                Understand where your money should
+                go before you spend it.
+            </p>
+
+        </div>
+
+
+        <div class="feature-card">
+
+            <div class="planner-icon">
+                ⚡
+            </div>
+
+            <h3>
+                Save Time
+            </h3>
+
+            <p>
+                Compare options and plan everything
+                from one place.
+            </p>
+
+        </div>
+
+    </div>
+
+</section>
+
+</main>
+
+
+<!-- ========================================================= -->
+<!-- FOOTER -->
+<!-- ========================================================= -->
+
+<footer>
+
+    <div class="logo">
+
+        <span class="logo-icon">
+            ◈
+        </span>
+
+        PocketSmart <span>AI</span>
+
+    </div>
+
+    <p>
+        Smart budgeting powered by AI.
+    </p>
+
+</footer>
+
+
+<!-- ========================================================= -->
+<!-- JAVASCRIPT -->
+<!-- ========================================================= -->
+
+<script
+    src="{{ url_for('static', path='js/script.js') }}"
+></script>
+
+</body>
+</html>
